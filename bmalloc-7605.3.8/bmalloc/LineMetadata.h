@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef LineMetadata_h
+#define LineMetadata_h
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+struct LineMetadata {
+    unsigned char startOffset;
+    unsigned char objectCount;
+};
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+static_assert(
+    smallLineSize - alignment <= std::numeric_limits<unsigned char>::max(),
+    "maximum object offset must fit in LineMetadata::startOffset");
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+static_assert(
+    smallLineSize / alignment <= std::numeric_limits<unsigned char>::max(),
+    "maximum object count must fit in LineMetadata::objectCount");
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // LineMetadata_h

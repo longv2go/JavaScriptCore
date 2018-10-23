@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "FixedVector.h"
+#include "IsoPage.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+class Mutex;
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+template<typename Config>
+class IsoDeallocator {
+public:
+    static constexpr unsigned logsPerPage = 2;
+    static constexpr unsigned logCapacity =
+        (IsoPageBase::pageSize / Config::objectSize + logsPerPage - 1) / logsPerPage;
+    
+    IsoDeallocator(Mutex& lock);
+    ~IsoDeallocator();
+    
+    void deallocate(void* p);
+    void scavenge();
+    
+private:
+    Mutex* m_lock;
+    FixedVector<void*, logCapacity> m_objectLog;
+};
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif

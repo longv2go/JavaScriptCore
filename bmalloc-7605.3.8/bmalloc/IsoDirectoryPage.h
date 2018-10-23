@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "BMalloced.h"
+#include "IsoDirectory.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+template<typename Config>
+class IsoDirectoryPage {
+    MAKE_BMALLOCED;
+public:
+    // By my math, this results in an IsoDirectoryPage using 4036 bytes on 64-bit platforms. We allocate it
+    // with malloc, so it doesn't really matter how much memory it uses. But it's nice that this about a
+    // page, since that's quite intuitive.
+    //
+    // On 32-bit platforms, I think that this will be 2112 bytes. That's still quite intuitive.
+    //
+    // Note that this is a multiple of 32 so that it uses bitvectors efficiently.
+    static constexpr unsigned numPages = 480;
+    
+    IsoDirectoryPage(IsoHeapImpl<Config>&, unsigned index);
+    
+    static IsoDirectoryPage* pageFor(IsoDirectory<Config, numPages>* payload);
+    
+    unsigned index() const { return m_index; }
+    
+    IsoDirectory<Config, numPages> payload;
+    IsoDirectoryPage* next { nullptr };
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+private:
+    unsigned m_index;
+};
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif

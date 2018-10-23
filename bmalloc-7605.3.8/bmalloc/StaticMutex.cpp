@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "ScopeExit.h"
+#include "StaticMutex.h"
+#include <thread>
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+void StaticMutex::lockSlowCase()
+{
+    // The longest critical section in bmalloc is much shorter than the
+    // time it takes to make a system call to yield to the OS scheduler.
+    // So, we try again a lot before we yield.
+    static const size_t aLot = 256;
+    
+    if (!m_isSpinning.test_and_set()) {
+        auto clear = makeScopeExit([&] { m_isSpinning.clear(); });
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+        for (size_t i = 0; i < aLot; ++i) {
+            if (try_lock())
+                return;
+        }
+    }
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+    // Avoid spinning pathologically.
+    while (!try_lock())
+        sched_yield();
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+} // namespace bmalloc

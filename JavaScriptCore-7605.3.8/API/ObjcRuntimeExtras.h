@@ -24,7 +24,7 @@
  */
 
 #import <memory>
-#import <objc/Protocol.h>
+#import "Protocol.h" // copy <objc/Protocol.h> from macOS SDK
 #import <objc/runtime.h>
 #import <wtf/HashSet.h>
 #import <wtf/SystemFree.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef Range_h
+#define Range_h
 
-#if JSC_OBJC_API_ENABLED
+#include <algorithm>
+#include <cstddef>
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+class Range {
+public:
+    Range()
+        : m_begin(0)
+        , m_size(0)
+    {
+    }
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+    Range(void* start, size_t size)
+        : m_begin(static_cast<char*>(start))
+        , m_size(size)
+    {
+    }
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+    char* begin() const { return m_begin; }
+    char* end() const { return m_begin + m_size; }
+    size_t size() const { return m_size; }
+    
+    bool operator!() const { return !m_size; }
+    explicit operator bool() const { return !!*this; }
+    bool operator<(const Range& other) const { return m_begin < other.m_begin; }
 
-@end
+private:
+    char* m_begin;
+    size_t m_size;
+};
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+inline bool canMerge(const Range& a, const Range& b)
+{
+    return a.begin() == b.end() || a.end() == b.begin();
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+inline Range merge(const Range& a, const Range& b)
+{
+    return Range(std::min(a.begin(), b.begin()), a.size() + b.size());
+}
 
-#endif
+} // namespace bmalloc
+
+#endif // Range_h

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "IsoTLSEntry.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+template<typename Func>
+void IsoTLSEntry::walkUpToInclusive(IsoTLSEntry* last, const Func& func)
+{
+    IsoTLSEntry* current = this;
+    for (;;) {
+        func(current);
+        if (current == last)
+            return;
+        current = current->m_next;
+    }
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+template<typename EntryType>
+DefaultIsoTLSEntry<EntryType>::DefaultIsoTLSEntry()
+    : IsoTLSEntry(alignof(EntryType), sizeof(EntryType))
+{
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+template<typename EntryType>
+DefaultIsoTLSEntry<EntryType>::~DefaultIsoTLSEntry()
+{
+}
 
-@end
+template<typename EntryType>
+void DefaultIsoTLSEntry<EntryType>::move(void* passedSrc, void* dst)
+{
+    EntryType* src = static_cast<EntryType*>(passedSrc);
+    new (dst) EntryType(std::move(*src));
+    src->~EntryType();
+}
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+template<typename EntryType>
+void DefaultIsoTLSEntry<EntryType>::destruct(void* passedEntry)
+{
+    EntryType* entry = static_cast<EntryType*>(passedEntry);
+    entry->~EntryType();
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+template<typename EntryType>
+void DefaultIsoTLSEntry<EntryType>::scavenge(void* passedEntry)
+{
+    EntryType* entry = static_cast<EntryType*>(passedEntry);
+    entry->scavenge();
+}
 
-#endif
+} // namespace bmalloc
+

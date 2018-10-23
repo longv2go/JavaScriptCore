@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "DeferredTrigger.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+template<IsoPageTrigger trigger>
+template<typename Config>
+void DeferredTrigger<trigger>::didBecome(IsoPage<Config>& page)
+{
+    if (page.isInUseForAllocation())
+        m_hasBeenDeferred = true;
+    else
+        page.directory().didBecome(&page, trigger);
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+template<IsoPageTrigger trigger>
+template<typename Config>
+void DeferredTrigger<trigger>::handleDeferral(IsoPage<Config>& page)
+{
+    RELEASE_BASSERT(!page.isInUseForAllocation());
+    
+    if (m_hasBeenDeferred) {
+        page.directory().didBecome(&page, trigger);
+        m_hasBeenDeferred = false;
+    }
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif

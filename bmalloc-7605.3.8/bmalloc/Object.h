@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef Object_h
+#define Object_h
 
-#if JSC_OBJC_API_ENABLED
+#include <cstddef>
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+class Chunk;
+class SmallLine;
+class SmallPage;
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+class Object {
+public:
+    Object(void*);
+    Object(Chunk*, void*);
+    Object(Chunk* chunk, size_t offset)
+        : m_chunk(chunk)
+        , m_offset(offset)
+    {
+    }
+    
+    Chunk* chunk() { return m_chunk; }
+    size_t offset() { return m_offset; }
+    char* address();
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+    SmallLine* line();
+    SmallPage* page();
+    
+    Object operator+(size_t);
+    Object operator-(size_t);
+    bool operator<=(const Object&);
 
-@end
+private:
+    Chunk* m_chunk;
+    size_t m_offset;
+};
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+inline Object Object::operator+(size_t offset)
+{
+    return Object(m_chunk, m_offset + offset);
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+inline Object Object::operator-(size_t offset)
+{
+    return Object(m_chunk, m_offset - offset);
+}
 
-#endif
+inline bool Object::operator<=(const Object& other)
+{
+    BASSERT(m_chunk == other.m_chunk);
+    return m_offset <= other.m_offset;
+}
+
+}; // namespace bmalloc
+
+#endif // Object_h

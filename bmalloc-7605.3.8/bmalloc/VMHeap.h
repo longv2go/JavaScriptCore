@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef VMHeap_h
+#define VMHeap_h
 
-#if JSC_OBJC_API_ENABLED
-
-@interface JSWrapperMap : NSObject
-
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
-
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
+#include "Chunk.h"
+#include "FixedVector.h"
+#include "HeapKind.h"
+#include "LargeRange.h"
+#include "Map.h"
+#include "Vector.h"
+#if BOS(DARWIN)
+#include "Zone.h"
 #endif
+
+namespace bmalloc {
+
+class BeginTag;
+class EndTag;
+class Heap;
+
+typedef enum { Sync, Async } ScavengeMode;
+
+class VMHeap {
+public:
+    VMHeap(std::lock_guard<StaticMutex>&);
+    
+    LargeRange tryAllocateLargeChunk(size_t alignment, size_t);
+};
+
+} // namespace bmalloc
+
+#endif // VMHeap_h

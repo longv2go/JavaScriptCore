@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "PerProcess.h"
+#include "VMHeap.h"
+#include <thread>
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+VMHeap::VMHeap(std::lock_guard<StaticMutex>&)
+{
+}
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+LargeRange VMHeap::tryAllocateLargeChunk(size_t alignment, size_t size)
+{
+    // We allocate VM in aligned multiples to increase the chances that
+    // the OS will provide contiguous ranges that we can merge.
+    size_t roundedAlignment = roundUpToMultipleOf<chunkSize>(alignment);
+    if (roundedAlignment < alignment) // Check for overflow
+        return LargeRange();
+    alignment = roundedAlignment;
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+    size_t roundedSize = roundUpToMultipleOf<chunkSize>(size);
+    if (roundedSize < size) // Check for overflow
+        return LargeRange();
+    size = roundedSize;
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
+    void* memory = tryVMAllocate(alignment, size);
+    if (!memory)
+        return LargeRange();
+    
+    Chunk* chunk = static_cast<Chunk*>(memory);
+    
+#if BOS(DARWIN)
+    PerProcess<Zone>::get()->addRange(Range(chunk->bytes(), size));
 #endif
+
+    return LargeRange(chunk->bytes(), size, 0);
+}
+
+} // namespace bmalloc

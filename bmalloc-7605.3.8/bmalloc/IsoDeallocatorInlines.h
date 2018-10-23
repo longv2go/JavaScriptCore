@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "BInline.h"
+#include "IsoDeallocator.h"
+#include "IsoPage.h"
+#include "Mutex.h"
+#include <mutex>
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+template<typename Config>
+IsoDeallocator<Config>::IsoDeallocator(Mutex& lock)
+    : m_lock(&lock)
+{
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+template<typename Config>
+IsoDeallocator<Config>::~IsoDeallocator()
+{
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+template<typename Config>
+void IsoDeallocator<Config>::deallocate(void* ptr)
+{
+    static constexpr bool verbose = false;
+    if (verbose)
+        fprintf(stderr, "%p: deallocating %p of size %u\n", &IsoPage<Config>::pageFor(ptr)->heap(), ptr, Config::objectSize);
 
-@end
+    if (m_objectLog.size() == m_objectLog.capacity())
+        scavenge();
+    
+    m_objectLog.push(ptr);
+}
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+template<typename Config>
+BNO_INLINE void IsoDeallocator<Config>::scavenge()
+{
+    std::lock_guard<Mutex> locker(*m_lock);
+    
+    for (void* ptr : m_objectLog)
+        IsoPage<Config>::pageFor(ptr)->free(ptr);
+    m_objectLog.clear();
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+} // namespace bmalloc
 
-#endif

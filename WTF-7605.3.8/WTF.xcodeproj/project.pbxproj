@@ -44,7 +44,6 @@
 		0FE4479C1B7AAA03009498EB /* WordLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FE4479A1B7AAA03009498EB /* WordLock.cpp */; };
 		0FEC3C5E1F368A9700F59B6C /* ReadWriteLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FEC3C5C1F368A9700F59B6C /* ReadWriteLock.cpp */; };
 		0FFF19DC1BB334EB00886D91 /* ParallelHelperPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FFF19DA1BB334EB00886D91 /* ParallelHelperPool.cpp */; };
-		14022F4118F5C3FC007FF0EB /* libbmalloc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 14022F4018F5C3FC007FF0EB /* libbmalloc.a */; };
 		143F611F1565F0F900DB514A /* RAMSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 143F611D1565F0F900DB514A /* RAMSize.cpp */; };
 		1447AEC618FCE57700B3D7FF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1447AEC518FCE57700B3D7FF /* Foundation.framework */; };
 		1447AEC718FCE58000B3D7FF /* libWTF.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D247B6214689B8600E78B76 /* libWTF.a */; };
@@ -66,6 +65,7 @@
 		2CDED0EF18115C38004DBA70 /* RunLoopCF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDED0EE18115C38004DBA70 /* RunLoopCF.cpp */; };
 		2CDED0F318115C85004DBA70 /* RunLoop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CDED0F118115C85004DBA70 /* RunLoop.cpp */; };
 		3337DB9CE743410FAF076E17 /* StackTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 313EDEC9778E49C9BEA91CFC /* StackTrace.cpp */; };
+		5003F967217EE02A00117D83 /* libbmalloc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5003F961217EE00100117D83 /* libbmalloc.a */; };
 		515F794E1CFC9F4A00CCED93 /* CrossThreadCopier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 515F794B1CFC9F4A00CCED93 /* CrossThreadCopier.cpp */; };
 		517F82D71FD22F3000DA3DEA /* CrossThreadTaskHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 517F82D51FD22F2F00DA3DEA /* CrossThreadTaskHandler.cpp */; };
 		51F1752B1F3D486000C74950 /* PersistentCoders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51F175261F3D486000C74950 /* PersistentCoders.cpp */; };
@@ -162,6 +162,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 5D247B6114689B8600E78B76;
 			remoteInfo = WTF;
+		};
+		5003F960217EE00100117D83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5003F959217EE00100117D83 /* bmalloc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 14F271BE18EA3963008C152F;
+			remoteInfo = bmalloc;
+		};
+		5003F962217EE00100117D83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5003F959217EE00100117D83 /* bmalloc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 14CC394418EA8743004AFE34;
+			remoteInfo = mbmalloc;
+		};
+		5003F964217EE00100117D83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5003F959217EE00100117D83 /* bmalloc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0F7EB7EF1F95285300F1ABCB;
+			remoteInfo = testbmalloc;
 		};
 		65AFA28D1630B99E003D723C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -330,6 +351,7 @@
 		413FE8F51F8D2EAB00F6D7D7 /* CallbackAggregator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallbackAggregator.h; sourceTree = "<group>"; };
 		430B47871AAAAC1A001223DA /* StringCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringCommon.h; sourceTree = "<group>"; };
 		46BA9EAB1F4CD61E009A2BBC /* CompletionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompletionHandler.h; sourceTree = "<group>"; };
+		5003F959217EE00100117D83 /* bmalloc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = bmalloc.xcodeproj; path = "../bmalloc-7605.3.8/bmalloc.xcodeproj"; sourceTree = "<group>"; };
 		513E170A1CD7D5BF00E3650B /* LoggingAccumulator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoggingAccumulator.h; sourceTree = "<group>"; };
 		515F794B1CFC9F4A00CCED93 /* CrossThreadCopier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CrossThreadCopier.cpp; sourceTree = "<group>"; };
 		515F794C1CFC9F4A00CCED93 /* CrossThreadCopier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossThreadCopier.h; sourceTree = "<group>"; };
@@ -646,7 +668,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14022F4118F5C3FC007FF0EB /* libbmalloc.a in Frameworks */,
+				5003F967217EE02A00117D83 /* libbmalloc.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -702,15 +724,34 @@
 			path = darwin;
 			sourceTree = "<group>";
 		};
+		5003F95A217EE00100117D83 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5003F961217EE00100117D83 /* libbmalloc.a */,
+				5003F963217EE00100117D83 /* libmbmalloc.dylib */,
+				5003F965217EE00100117D83 /* testbmalloc */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5003F966217EE02A00117D83 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5D247B5714689B8600E78B76 = {
 			isa = PBXGroup;
 			children = (
+				5003F959217EE00100117D83 /* bmalloc.xcodeproj */,
 				5D247B6D14689C4700E78B76 /* Configurations */,
 				14022F3F18F5C3E5007FF0EB /* Libraries */,
 				5D247B6314689B8600E78B76 /* Products */,
 				5D247B7614689D7600E78B76 /* Source */,
 				1447AEC518FCE57700B3D7FF /* Foundation.framework */,
 				1447AECA18FCE5B900B3D7FF /* libicucore.dylib */,
+				5003F966217EE02A00117D83 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1366,6 +1407,12 @@
 			mainGroup = 5D247B5714689B8600E78B76;
 			productRefGroup = 5D247B6314689B8600E78B76 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 5003F95A217EE00100117D83 /* Products */;
+					ProjectRef = 5003F959217EE00100117D83 /* bmalloc.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				5D247B6114689B8600E78B76 /* WTF */,
@@ -1374,6 +1421,30 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		5003F961217EE00100117D83 /* libbmalloc.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libbmalloc.a;
+			remoteRef = 5003F960217EE00100117D83 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5003F963217EE00100117D83 /* libmbmalloc.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libmbmalloc.dylib;
+			remoteRef = 5003F962217EE00100117D83 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5003F965217EE00100117D83 /* testbmalloc */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = testbmalloc;
+			remoteRef = 5003F964217EE00100117D83 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		65AFA1701630B977003D723C /* Copy WTF Headers */ = {
@@ -1580,6 +1651,7 @@
 				DEBUG_DEFINES = "$(DEBUG_DEFINES_debug)";
 				GCC_OPTIMIZATION_LEVEL = "$(GCC_OPTIMIZATION_LEVEL_debug)";
 				STRIP_INSTALLED_PRODUCT = "$(STRIP_INSTALLED_PRODUCT_debug)";
+				SYSTEM_HEADER_SEARCH_PATHS = "$(SRCROOT)/../bmalloc-7605.3.8";
 			};
 			name = Debug;
 		};
@@ -1587,6 +1659,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D247B7014689C4700E78B76 /* DebugRelease.xcconfig */;
 			buildSettings = {
+				SYSTEM_HEADER_SEARCH_PATHS = "$(SRCROOT)/../bmalloc-7605.3.8";
 			};
 			name = Release;
 		};
@@ -1594,6 +1667,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D247B7314689C4700E78B76 /* WTF.xcconfig */;
 			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -1601,6 +1675,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D247B7314689C4700E78B76 /* WTF.xcconfig */;
 			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -1608,6 +1683,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D247B6E14689C4700E78B76 /* Base.xcconfig */;
 			buildSettings = {
+				SYSTEM_HEADER_SEARCH_PATHS = "$(SRCROOT)/../bmalloc-7605.3.8";
 			};
 			name = Production;
 		};
@@ -1615,6 +1691,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5D247B7314689C4700E78B76 /* WTF.xcconfig */;
 			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Production;
 		};

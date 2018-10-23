@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2018 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#import "ProcessCheck.h"
 
-#if JSC_OBJC_API_ENABLED
+#if !BPLATFORM(WATCHOS)
 
-@interface JSWrapperMap : NSObject
+#import <Foundation/Foundation.h>
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+namespace bmalloc {
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+bool gigacageEnabledForProcess()
+{
+    static NSString *appName = [[NSBundle mainBundle] bundleIdentifier];
+    if (appName) {
+        static bool isWebProcess = [appName isEqualToString:@"com.apple.WebKit.WebContent.Development"]
+            || [appName isEqualToString:@"com.apple.WebKit.WebContent"]
+            || [appName isEqualToString:@"com.apple.WebProcess"];
+        return isWebProcess;
+    }
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+    static NSString *processName = [[NSProcessInfo processInfo] processName];
+    static bool isOptInBinary = [processName isEqualToString:@"jsc"]
+        || [processName isEqualToString:@"wasm"]
+        || [processName hasPrefix:@"test"];
 
-@end
+    return isOptInBinary;
+}
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+}
 
 #endif

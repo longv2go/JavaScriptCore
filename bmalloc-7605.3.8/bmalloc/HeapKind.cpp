@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "HeapKind.h"
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+bool isActiveHeapKind(HeapKind kind)
+{
+    Gigacage::ensureGigacage();
+    return isActiveHeapKindAfterEnsuringGigacage(kind);
+}
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+HeapKind mapToActiveHeapKind(HeapKind kind)
+{
+    Gigacage::ensureGigacage();
+    return mapToActiveHeapKindAfterEnsuringGigacage(kind);
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+} // namespace bmalloc

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef BInline_h
+#define BInline_h
 
-#if JSC_OBJC_API_ENABLED
+#define BINLINE __attribute__((always_inline)) inline
 
-@interface JSWrapperMap : NSObject
+#define BNO_INLINE __attribute__((noinline))
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
-
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // BInline_h

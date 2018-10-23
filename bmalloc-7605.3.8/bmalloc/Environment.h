@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef Environment_h
+#define Environment_h
 
-#if JSC_OBJC_API_ENABLED
+#include "StaticMutex.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+class Environment {
+public:
+    Environment(std::lock_guard<StaticMutex>&);
+    
+    bool isDebugHeapEnabled() { return m_isDebugHeapEnabled; }
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+private:
+    bool computeIsDebugHeapEnabled();
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+    bool m_isDebugHeapEnabled;
+};
 
-@end
+} // namespace bmalloc
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // Environment_h

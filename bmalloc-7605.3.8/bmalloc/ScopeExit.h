@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include <type_traits>
+#include <utility>
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+template<typename ExitFunction>
+class ScopeExit {
+public:
+    explicit ScopeExit(ExitFunction&& exitFunction)
+        : m_exitFunction(exitFunction)
+    {
+    }
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+    ~ScopeExit()
+    {
+        m_exitFunction();
+    }
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+private:
+    ExitFunction m_exitFunction;
+};
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+template<typename ExitFunction>
+ScopeExit<ExitFunction> makeScopeExit(ExitFunction&& exitFunction)
+{
+    return ScopeExit<ExitFunction>(std::forward<ExitFunction>(exitFunction));
+}
+    
+} // namespace bmalloc

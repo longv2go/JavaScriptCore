@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef LargeMap_h
+#define LargeMap_h
 
-#if JSC_OBJC_API_ENABLED
+#include "LargeRange.h"
+#include "Vector.h"
+#include <algorithm>
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+class LargeMap {
+public:
+    LargeRange* begin() { return m_free.begin(); }
+    LargeRange* end() { return m_free.end(); }
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+    void add(const LargeRange&);
+    LargeRange remove(size_t alignment, size_t);
+    Vector<LargeRange>& ranges() { return m_free; }
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+private:
+    Vector<LargeRange> m_free;
+};
 
-@end
+} // namespace bmalloc
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // LargeMap_h

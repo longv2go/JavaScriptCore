@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "AllIsoHeaps.h"
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+AllIsoHeaps::AllIsoHeaps(const std::lock_guard<StaticMutex>&)
+{
+}
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+void AllIsoHeaps::add(IsoHeapImplBase* heap)
+{
+    std::lock_guard<Mutex> locker(m_lock);
+    heap->m_next = m_head;
+    m_head = heap;
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+IsoHeapImplBase* AllIsoHeaps::head()
+{
+    std::lock_guard<Mutex> locker(m_lock);
+    return m_head;
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif

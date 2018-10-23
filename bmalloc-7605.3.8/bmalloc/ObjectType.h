@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef ObjectType_h
+#define ObjectType_h
 
-#if JSC_OBJC_API_ENABLED
+#include "BAssert.h"
+#include "HeapKind.h"
+#include "Sizes.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+enum class ObjectType : unsigned char { Small, Large };
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+ObjectType objectType(HeapKind, void*);
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+inline bool mightBeLarge(void* object)
+{
+    return !test(object, largeAlignmentMask);
+}
 
-@end
+} // namespace bmalloc
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // ObjectType_h

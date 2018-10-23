@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2016-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+#include "StaticMutex.h"
+#include <mutex>
+#include <unordered_map>
 
-@interface JSWrapperMap : NSObject
-
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
-
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
+#if BOS(DARWIN)
+#include <malloc/malloc.h>
 #endif
+
+namespace bmalloc {
+    
+class DebugHeap {
+public:
+    DebugHeap(std::lock_guard<StaticMutex>&);
+    
+    void* malloc(size_t);
+    void* memalign(size_t alignment, size_t, bool crashOnFailure);
+    void* realloc(void*, size_t);
+    void free(void*);
+    
+    void* memalignLarge(size_t alignment, size_t);
+    void freeLarge(void* base);
+
+private:
+#if BOS(DARWIN)
+    malloc_zone_t* m_zone;
+#endif
+    
+    // This is the debug heap. We can use whatever data structures we like. It doesn't matter.
+    size_t m_pageSize;
+    std::mutex m_lock;
+    std::unordered_map<void*, size_t> m_sizeMap;
+};
+
+} // namespace bmalloc

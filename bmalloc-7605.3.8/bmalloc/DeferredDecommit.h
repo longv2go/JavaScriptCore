@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
+namespace bmalloc {
 
-@interface JSWrapperMap : NSObject
+class IsoDirectoryBaseBase;
+class IsoPageBase;
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+struct DeferredDecommit {
+    DeferredDecommit();
+    DeferredDecommit(IsoDirectoryBaseBase* directory, IsoPageBase* page, unsigned pageIndex);
+    
+    IsoDirectoryBaseBase* directory { nullptr };
+    IsoPageBase* page { nullptr };
+    unsigned pageIndex { 0 };
+};
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+} // namespace bmalloc
+    

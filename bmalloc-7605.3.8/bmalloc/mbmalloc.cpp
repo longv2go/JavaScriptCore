@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "bmalloc.h"
 
-#if JSC_OBJC_API_ENABLED
+#include "BExport.h"
 
-@interface JSWrapperMap : NSObject
+extern "C" {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+BEXPORT void* mbmalloc(size_t);
+BEXPORT void* mbmemalign(size_t, size_t);
+BEXPORT void mbfree(void*, size_t);
+BEXPORT void* mbrealloc(void*, size_t, size_t);
+BEXPORT void mbscavenge();
+    
+void* mbmalloc(size_t size)
+{
+    return bmalloc::api::malloc(size);
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+void* mbmemalign(size_t alignment, size_t size)
+{
+    return bmalloc::api::memalign(alignment, size);
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+void mbfree(void* p, size_t)
+{
+    bmalloc::api::free(p);
+}
 
-@end
+void* mbrealloc(void* p, size_t, size_t size)
+{
+    return bmalloc::api::realloc(p, size);
+}
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+void mbscavenge()
+{
+    bmalloc::api::scavenge();
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+} // extern "C"

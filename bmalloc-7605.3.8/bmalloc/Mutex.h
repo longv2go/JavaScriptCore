@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2014 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#ifndef Mutex_h
+#define Mutex_h
 
-#if JSC_OBJC_API_ENABLED
+#include "StaticMutex.h"
 
-@interface JSWrapperMap : NSObject
+// A fast replacement for std::mutex, for use in standard storage.
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+namespace bmalloc {
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+class Mutex : public StaticMutex {
+public:
+    Mutex();
+};
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+inline Mutex::Mutex()
+{
+    // StaticMutex requires explicit initialization when used in non-static storage.
+    init();
+}
 
-@end
+} // namespace bmalloc
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif
+#endif // Mutex_h

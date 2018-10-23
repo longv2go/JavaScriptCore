@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "IsoTLSEntry.h"
 
-#if JSC_OBJC_API_ENABLED
+#include "BAssert.h"
+#include "IsoTLSLayout.h"
+#include "PerProcess.h"
+#include <climits>
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+IsoTLSEntry::IsoTLSEntry(size_t alignment, size_t size)
+    : m_offset(UINT_MAX)
+    , m_alignment(alignment)
+    , m_size(size)
+{
+    PerProcess<IsoTLSLayout>::get()->add(this);
+    RELEASE_BASSERT(m_offset != UINT_MAX);
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+IsoTLSEntry::~IsoTLSEntry()
+{
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+} // namespace bmalloc
 
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
-#endif

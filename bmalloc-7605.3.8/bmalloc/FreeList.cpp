@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2016-2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,61 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#include "FreeList.h"
 
-#if JSC_OBJC_API_ENABLED
+#include "FreeListInlines.h"
 
-@interface JSWrapperMap : NSObject
+namespace bmalloc {
 
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
+FreeList::FreeList()
+{
+}
 
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
+FreeList::~FreeList()
+{
+}
 
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
+void FreeList::clear()
+{
+    *this = FreeList();
+}
 
-@end
+void FreeList::initializeList(FreeCell* head, uintptr_t secret, unsigned bytes)
+{
+    // It's *slightly* more optimal to use a scrambled head. It saves a register on the fast path.
+    m_scrambledHead = FreeCell::scramble(head, secret);
+    m_secret = secret;
+    m_payloadEnd = nullptr;
+    m_remaining = 0;
+    m_originalSize = bytes;
+}
 
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
+void FreeList::initializeBump(char* payloadEnd, unsigned remaining)
+{
+    m_scrambledHead = 0;
+    m_secret = 0;
+    m_payloadEnd = payloadEnd;
+    m_remaining = remaining;
+    m_originalSize = remaining;
+}
 
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
+bool FreeList::contains(void* target) const
+{
+    if (m_remaining) {
+        const void* start = (m_payloadEnd - m_remaining);
+        const void* end = m_payloadEnd;
+        return (start <= target) && (target < end);
+    }
 
-#endif
+    FreeCell* candidate = head();
+    while (candidate) {
+        if (static_cast<void*>(candidate) == target)
+            return true;
+        candidate = candidate->next(m_secret);
+    }
+
+    return false;
+}
+
+} // namespace JSC
+

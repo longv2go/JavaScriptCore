@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Apple Inc. All rights reserved.
+ * Copyright (C) 2017 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,27 +23,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <JavaScriptCore/JavaScriptCore.h>
-#import <JSValueInternal.h>
-#include <objc/runtime.h>
-#include <objc/message.h>
+#pragma once
 
-#if JSC_OBJC_API_ENABLED
-
-@interface JSWrapperMap : NSObject
-
-- (instancetype)initWithGlobalContextRef:(JSGlobalContextRef)context;
-
-- (JSValue *)jsWrapperForObject:(id)object inContext:(JSContext *)context;
-
-- (JSValue *)objcWrapperForJSValueRef:(JSValueRef)value inContext:(JSContext *)context;
-
-@end
-
-id tryUnwrapObjcObject(JSGlobalContextRef, JSValueRef);
-
-bool supportsInitMethodConstructors();
-Protocol *getJSExportProtocol();
-Class getNSBlockClass();
-
+/* BCOMPILER_HAS_CLANG_FEATURE() - whether the compiler supports a particular language or library feature. */
+/* http://clang.llvm.org/docs/LanguageExtensions.html#has-feature-and-has-extension */
+#ifdef __has_feature
+#define BCOMPILER_HAS_CLANG_FEATURE(x) __has_feature(x)
+#else
+#define BCOMPILER_HAS_CLANG_FEATURE(x) 0
 #endif
+
+#define BASAN_ENABLED BCOMPILER_HAS_CLANG_FEATURE(address_sanitizer)
+
