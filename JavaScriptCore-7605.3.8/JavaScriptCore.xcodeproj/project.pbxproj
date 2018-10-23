@@ -19,6 +19,18 @@
 			name = "LLInt Offsets";
 			productName = "Derived Sources";
 		};
+		5003F986217EF63200117D83 /* Offline Assembler iOS */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 5003F98C217EF63200117D83 /* Build configuration list for PBXAggregateTarget "Offline Assembler iOS" */;
+			buildPhases = (
+				5003F98B217EF63200117D83 /* Offline Assemble */,
+			);
+			dependencies = (
+				5003F989217EF63200117D83 /* PBXTargetDependency */,
+			);
+			name = "Offline Assembler iOS";
+			productName = "Offline Assembler";
+		};
 		53B4BD041F68AF8900D2BEA3 /* Generate Unified Sources */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 53B4BD0A1F68AF8900D2BEA3 /* Build configuration list for PBXAggregateTarget "Generate Unified Sources" */;
@@ -1836,6 +1848,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 0FF922C314F46B130041A24E;
 			remoteInfo = JSCLLIntOffsetsExtractor;
+		};
+		5003F98A217EF63200117D83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 65FB3F6609D11E9100F49DEB;
+			remoteInfo = "Derived Sources";
+		};
+		5003F991217EF92D00117D83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5003F986217EF63200117D83;
+			remoteInfo = "Offline Assembler iOS";
 		};
 		53B4BD131F68C2AA00D2BEA3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -9706,6 +9732,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				5003F992217EF92D00117D83 /* PBXTargetDependency */,
 				65FB3F7E09D11EF300F49DEB /* PBXTargetDependency */,
 				53B4BD141F68C2AA00D2BEA3 /* PBXTargetDependency */,
 			);
@@ -9786,6 +9813,7 @@
 				65FB3F6609D11E9100F49DEB /* Derived Sources */,
 				0FF922C314F46B130041A24E /* JSCLLIntOffsetsExtractor */,
 				65788A9D18B409EB00C189FF /* Offline Assembler */,
+				5003F986217EF63200117D83 /* Offline Assembler iOS */,
 				53B4BD041F68AF8900D2BEA3 /* Generate Unified Sources */,
 				1412111F0A48793C00480255 /* minidom */,
 				14BD59BE0A3E8F9000BAF59C /* testapi */,
@@ -9891,6 +9919,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "exec ${SRCROOT}/postprocess-headers.sh";
+		};
+		5003F98B217EF63200117D83 /* Offline Assemble */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Offline Assemble";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ \"${ACTION}\" == \"installhdrs\" ]]; then\n    exit 0\nfi\n\n// copy JSCLLIntOffsetsExtractor\necho \"${BUILT_PRODUCTS_DIR}/../Debug/JSCLLIntOffsetsExtractor\"\ncp \"${BUILT_PRODUCTS_DIR}/../Debug/JSCLLIntOffsetsExtractor\" \"${BUILT_PRODUCTS_DIR}\"\n\ncd \"${BUILT_PRODUCTS_DIR}/DerivedSources/JavaScriptCore\"\n\n/usr/bin/env ruby JavaScriptCore/offlineasm/asm.rb \"-I${BUILT_PRODUCTS_DIR}/DerivedSources/JavaScriptCore\" JavaScriptCore/llint/LowLevelInterpreter.asm \"${BUILT_PRODUCTS_DIR}/JSCLLIntOffsetsExtractor\" LLIntAssembly.h || exit 1";
 		};
 		53B4BD091F68AF8900D2BEA3 /* Generate Unified Sources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -10316,6 +10358,16 @@
 			target = 0FF922C314F46B130041A24E /* JSCLLIntOffsetsExtractor */;
 			targetProxy = 5003F978217EE1E100117D83 /* PBXContainerItemProxy */;
 		};
+		5003F989217EF63200117D83 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 65FB3F6609D11E9100F49DEB /* Derived Sources */;
+			targetProxy = 5003F98A217EF63200117D83 /* PBXContainerItemProxy */;
+		};
+		5003F992217EF92D00117D83 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5003F986217EF63200117D83 /* Offline Assembler iOS */;
+			targetProxy = 5003F991217EF92D00117D83 /* PBXContainerItemProxy */;
+		};
 		53B4BD141F68C2AA00D2BEA3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 53B4BD041F68AF8900D2BEA3 /* Generate Unified Sources */;
@@ -10572,7 +10624,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				STRIP_STYLE = debugging;
 			};
 			name = Debug;
 		};
@@ -10580,7 +10634,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				STRIP_STYLE = debugging;
 			};
 			name = Release;
 		};
@@ -10589,7 +10645,9 @@
 			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
 			buildSettings = {
 				BUILD_VARIANTS = normal;
+				COPY_PHASE_STRIP = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				STRIP_STYLE = debugging;
 			};
 			name = Production;
 		};
@@ -10682,6 +10740,42 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC021BF2136900C300FC5467 /* ToolExecutable.xcconfig */;
 			buildSettings = {
+			};
+			name = Production;
+		};
+		5003F98D217EF63200117D83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = "Offline Assembler copy-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		5003F98E217EF63200117D83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = "Offline Assembler copy-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		5003F98F217EF63200117D83 /* Profiling */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = "Offline Assembler copy-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Profiling;
+		};
+		5003F990217EF63200117D83 /* Production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = "Offline Assembler copy-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Production;
 		};
@@ -10849,7 +10943,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1C9051430BA9E8A70081E9D0 /* JavaScriptCore.xcconfig */;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				STRIP_STYLE = debugging;
 			};
 			name = Profiling;
 		};
@@ -11034,6 +11130,17 @@
 				14BD59D80A3E8FC900BAF59C /* Release */,
 				A76148420E6402F700E357FA /* Profiling */,
 				14BD59D90A3E8FC900BAF59C /* Production */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Production;
+		};
+		5003F98C217EF63200117D83 /* Build configuration list for PBXAggregateTarget "Offline Assembler iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5003F98D217EF63200117D83 /* Debug */,
+				5003F98E217EF63200117D83 /* Release */,
+				5003F98F217EF63200117D83 /* Profiling */,
+				5003F990217EF63200117D83 /* Production */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Production;
