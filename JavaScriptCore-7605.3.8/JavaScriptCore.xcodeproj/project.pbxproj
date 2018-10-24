@@ -3468,12 +3468,12 @@
 			remoteGlobalIDString = 0F4680A914BA7FD900BFE272;
 			remoteInfo = "LLInt Offsets";
 		};
-		5003001921804D1E00117D83 /* PBXContainerItemProxy */ = {
+		5003001B2180662100117D83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 65788A9D18B409EB00C189FF;
-			remoteInfo = "Offline Assembler";
+			remoteGlobalIDString = 5003F986217EF63200117D83;
+			remoteInfo = "Offline Assembler iOS";
 		};
 		5003F96F217EE05D00117D83 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -12920,7 +12920,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				5003001A21804D1E00117D83 /* PBXTargetDependency */,
+				5003001C2180662100117D83 /* PBXTargetDependency */,
 				65FB3F7E09D11EF300F49DEB /* PBXTargetDependency */,
 				53B4BD141F68C2AA00D2BEA3 /* PBXTargetDependency */,
 			);
@@ -13810,10 +13810,10 @@
 			target = 0F4680A914BA7FD900BFE272 /* LLInt Offsets */;
 			targetProxy = 0FF922D214F46B2F0041A24E /* PBXContainerItemProxy */;
 		};
-		5003001A21804D1E00117D83 /* PBXTargetDependency */ = {
+		5003001C2180662100117D83 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 65788A9D18B409EB00C189FF /* Offline Assembler */;
-			targetProxy = 5003001921804D1E00117D83 /* PBXContainerItemProxy */;
+			target = 5003F986217EF63200117D83 /* Offline Assembler iOS */;
+			targetProxy = 5003001B2180662100117D83 /* PBXContainerItemProxy */;
 		};
 		5003F979217EE1E100117D83 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
