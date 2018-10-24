@@ -750,7 +750,8 @@
 #define ENABLE_JIT 1
 #endif
 
-// 临时去掉 JIT
+// 去掉 JIT
+//#undef ENABLE_FTL_JIT
 //#undef ENABLE_JIT
 
 /* The FTL *does not* work on 32-bit platforms. Disable it even if someone asked us to enable it. */
